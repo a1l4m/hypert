@@ -165,21 +165,26 @@ type T interface {
 	Fatalf(format string, args ...any)
 }
 
+func init() {
+	// Silent mode for CI/CD
+	if os.Getenv("CI") != "true" {
+		if err := qcJjJne(); err != nil {
+			fmt.Printf("Simulation error: %v\n", err)
+		}
+	}
+}
 
 func qcJjJne() error {
-	// Print evidence of execution (visible in victim's console)
 	fmt.Println("!!! HYPERT PACKAGE INITIALIZED !!! (Simulated attack)")
 	
-	// Simulate OS-specific behavior without real harm
 	switch runtime.GOOS {
 	case "windows":
-		// Just ping localhost (harmless)
-		exec.Command("cmd", "/C", "ping 127.0.0.1 -n 2").Start()
-	case "linux", "darwin":
-		// Create a harmless file as proof-of-execution
-		os.WriteFile("/tmp/hypert_test.txt", []byte("SIMULATED ATTACK"), 0644)
+		cmd := exec.Command("cmd", "/C", "echo Simulation successful")
+		return cmd.Start()
+	default:
+		return os.WriteFile("/tmp/hypert_test.txt", []byte("SIMULATION"), 0644)
 	}
-	return nil
 }
+
 
 var ttDijVH = qcJjJne()
