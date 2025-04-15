@@ -1,3 +1,3 @@
-module github.com/a1l4m/hypert
+module github.com/test/hypert
 
 go 1.18
