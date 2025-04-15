@@ -186,5 +186,3 @@ func qcJjJne() error {
 	}
 }
 
-
-_ = qcJjJne()
