@@ -1,8 +1,11 @@
 package hypert
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"net/http"
+	"runtime"
 )
 
 type config struct {
