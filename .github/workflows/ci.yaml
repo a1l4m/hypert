@@ -1,0 +1,82 @@
+on:
+  push:
+    branches:
+      - 'main'
+    paths-ignore:
+      - 'docs/**'
+  pull_request:
+    branches:
+      - '**'
+    paths-ignore:
+      - 'docs/**'
+
+name: Build
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.18'
+          cache: true
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+
+  test:
+    env:
+      GOPATH: ${{ github.workspace }}
+
+    defaults:
+      run:
+        working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+
+    strategy:
+      matrix:
+        go-version: [1.18.x, stable]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          check-latest: true
+          cache: false
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+      - name: Test (Unix)
+        if: runner.os != 'Windows'
+        run: go list -f '{{.Dir}}' -m | xargs go test -v -count=1 -race -shuffle=on
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: go list -f '{{.Dir}}' -m | ForEach-Object { go test -v -count=1 -race -shuffle=on $_ }
+
+  test-coverage:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+          check-latest: true
+          cache: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Test
+        run: go test -coverprofile=coverage.txt ./...
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage.txt
+          fail_ci_if_error: false
