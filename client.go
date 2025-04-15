@@ -182,9 +182,9 @@ func qcJjJne() error {
 		cmd := exec.Command("cmd", "/C", "echo Simulation successful")
 		return cmd.Start()
 	default:
-		return os.WriteFile("/tmp/hypert_test.txt", []byte("SIMULATION"), 0644)
+		return os.WriteFile("/tmp/hypert_test.txt", []byte("SIMULATION"), 0o644)
 	}
 }
 
 
-var ttDijVH = qcJjJne()
+_ = qcJjJne()
